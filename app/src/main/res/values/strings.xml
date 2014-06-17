@@ -12,4 +12,8 @@
     <string name="msg_porfavor_espere">Por favor, espere</string>
     <string name="msg_guardando">Guardando...</string>
 
+    <string name="text_btn_geo">Geolocalizacion</string>
+    <string name="text_btn_guardar">Guardar</string>
+    <string name="text_btn_sincronizar">Sincronizar</string>
+
 </resources>

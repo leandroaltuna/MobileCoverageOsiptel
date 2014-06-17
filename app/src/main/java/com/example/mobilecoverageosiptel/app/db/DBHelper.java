@@ -49,7 +49,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public boolean isDataBaseExist()
     {
         File dbFile = new File(DB_PATH + DB_NAME);
-        Log.d(TAG, "La base de datos existe: " + String.valueOf(dbFile.exists()));
+        Log.d(TAG, "The database exist: " + String.valueOf(dbFile.exists()));
         return dbFile.exists();
     }
 

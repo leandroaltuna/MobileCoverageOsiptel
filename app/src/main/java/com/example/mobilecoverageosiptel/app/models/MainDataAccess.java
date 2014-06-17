@@ -18,34 +18,34 @@ public class MainDataAccess {
     {
         DBHelper dbHelper = DBHelper.getUtilDb(context);
 
-        String resultado = "0";
+        String result = "0";
 
         try {
             dbHelper.openDataBase();
             dbHelper.beginTransaction();
 
-            ContentValues valores = new ContentValues();
+            ContentValues values = new ContentValues();
 
-            valores.put("Departamento", oActa.departamento);
-            valores.put("Provincia", oActa.provincia);
-            valores.put("Distrito", oActa.distrito);
-            valores.put("Localidad", oActa.localidad);
-            valores.put("Latitud", oActa.latitud);
-            valores.put("Longitud", oActa.longitud);
+            values.put("Departamento", oActa.departamento);
+            values.put("Provincia", oActa.provincia);
+            values.put("Distrito", oActa.distrito);
+            values.put("Localidad", oActa.localidad);
+            values.put("Latitud", oActa.latitud);
+            values.put("Longitud", oActa.longitud);
 
-            Long id = dbHelper.getDatabase().insertOrThrow("Acta", null, valores);
+            Long id = dbHelper.getDatabase().insertOrThrow("Acta", null, values);
 
             if (id == 0) {
-                resultado = String.valueOf(0);
+                result = String.valueOf(0);
             } else {
-                resultado = String.valueOf(1);
+                result = String.valueOf(1);
             }
 
             dbHelper.setTransactionSuccessful();
         }
         catch (Exception e)
         {
-            Log.e(TAG, "MAIN_DATAACCESS", e);
+            Log.e(TAG, "MAIN_DATA_ACCESS", e);
         }
         finally
         {
@@ -53,7 +53,7 @@ public class MainDataAccess {
             dbHelper.close();
         }
 
-        return resultado;
+        return result;
     }
 
     public ArrayList<Acta> ListaActaAll(Context context)
@@ -95,7 +95,7 @@ public class MainDataAccess {
         }
         catch (Exception ex)
         {
-            Log.d(TAG, "LISTA_ACTA_ALL", ex);
+            Log.d(TAG, "ALL_LIST_ACTA", ex);
         }
         finally
         {

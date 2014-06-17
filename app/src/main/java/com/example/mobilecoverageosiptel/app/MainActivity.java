@@ -46,6 +46,7 @@ public class MainActivity extends ActionBarActivity {
     EditText editLocalidad;
     EditText editLatitud;
     EditText editLongitud;
+	EditText editAltitud;
 
     Button btnGuardar;
     Button btnSincronizar;
@@ -57,7 +58,7 @@ public class MainActivity extends ActionBarActivity {
 
     ArrayList<Acta> actaArrayList = new ArrayList<Acta>();
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -68,6 +69,7 @@ public class MainActivity extends ActionBarActivity {
         editLocalidad = (EditText) findViewById(R.id.editLocalidad);
         editLatitud = (EditText) findViewById(R.id.editLatitud);
         editLongitud = (EditText) findViewById(R.id.editLongitud);
+		editAltitud = (EditText) findViewById(R.id.editAltitud);
 
         btnGuardar = (Button) findViewById(R.id.btnGuardar);
         btnSincronizar = (Button) findViewById(R.id.btnSincronizar);
@@ -92,6 +94,14 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
 
+				Log.d(TAG, "startService");
+
+//				progressDialog = ProgressDialog.show(MainActivity.this, "Por favor espere", "Sincronizando...",true);
+//
+//				Intent intent = new Intent(getApplicationContext(), SyncService.class);
+//				startService(intent);
+
+
                 actaArrayList = MainBusinessLogic.ListaActaAll(getApplicationContext());
 
                 if (actaArrayList.size() == 0)
@@ -103,6 +113,7 @@ public class MainActivity extends ActionBarActivity {
                     SincronizarDataDB tarea = new SincronizarDataDB();
                     tarea.execute();
                 }
+
 
             }
         });
@@ -145,6 +156,8 @@ public class MainActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
 
     private class RegistraDataDB extends AsyncTask<Void, Void, String>
@@ -294,12 +307,14 @@ public class MainActivity extends ActionBarActivity {
 
             Double latitud = location.getLatitude();
             Double longitud = location.getLongitude();
+			Double altitud = location.getAltitude();
 
             String Text = "My current location is: " +
-                    "Latitud: " + latitud.toString() + "Longitud: " + longitud.toString();
+                    "Latitud: " + latitud.toString() + "Longitud: " + longitud.toString() + "Altitud: " + altitud.toString();
 
             editLatitud.setText(latitud.toString());
             editLongitud.setText(longitud.toString());
+			editAltitud.setText(altitud.toString());
 
             cargando = true;
             progressDialog.dismiss();
