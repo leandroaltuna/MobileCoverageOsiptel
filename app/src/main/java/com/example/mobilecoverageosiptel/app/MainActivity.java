@@ -21,7 +21,9 @@ import com.example.mobilecoverageosiptel.app.entities.Acta;
 import com.example.mobilecoverageosiptel.app.models.MainBusinessLogic;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 
 import org.apache.http.HttpResponse;
@@ -80,11 +82,6 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
 
-                editDepartamento = (EditText) findViewById(R.id.editDepartamento);
-                editProvincia = (EditText) findViewById(R.id.editProvincia);
-                editDistrito = (EditText) findViewById(R.id.editDistrito);
-                editLocalidad = (EditText) findViewById(R.id.editLocalidad);
-
                 RegistraDataDB tarea = new RegistraDataDB();
                 tarea.execute();
             }
@@ -96,23 +93,22 @@ public class MainActivity extends ActionBarActivity {
 
 				Log.d(TAG, "startService");
 
-//				progressDialog = ProgressDialog.show(MainActivity.this, "Por favor espere", "Sincronizando...",true);
+				actaArrayList = MainBusinessLogic.ListaActaAll(getApplicationContext());
+				Sincronizar sincronizar = new Sincronizar(actaArrayList);
+				sincronizar.start();
+
+
 //
-//				Intent intent = new Intent(getApplicationContext(), SyncService.class);
-//				startService(intent);
-
-
-                actaArrayList = MainBusinessLogic.ListaActaAll(getApplicationContext());
-
-                if (actaArrayList.size() == 0)
-                {
-                    Toast.makeText(getApplicationContext(), "No existen datos a sincronizar", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    SincronizarDataDB tarea = new SincronizarDataDB();
-                    tarea.execute();
-                }
+//
+//                if (actaArrayList.size() == 0)
+//                {
+//                    Toast.makeText(getApplicationContext(), "No existen datos a sincronizar", Toast.LENGTH_SHORT).show();
+//                }
+//                else
+//                {
+//                    SincronizarDataDB tarea = new SincronizarDataDB();
+//                    tarea.execute();
+//                }
 
 
             }
@@ -182,6 +178,7 @@ public class MainActivity extends ActionBarActivity {
             oActa.localidad = editLocalidad.getText().toString();
             oActa.latitud = editLatitud.getText().toString();
             oActa.longitud = editLongitud.getText().toString();
+			oActa.altura = editAltitud.getText().toString();
 
             DBHelper dbHelper = DBHelper.getUtilDb(getApplicationContext());
 
@@ -206,6 +203,65 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
+
+	private class Sincronizar extends Thread
+	{
+		private ArrayList<Acta> arrayList;
+
+		public Sincronizar(ArrayList<Acta> arrayList)
+		{
+			super("SincronizarThread");
+			this.arrayList = arrayList;
+		}
+
+		@Override
+		public void run() {
+
+			Log.d("Sincronizar","Thread run");
+
+			String result;
+			String url = "http://iacs-sac.com/index.php/acta_service";
+
+			try
+			{
+				HttpPost request = new HttpPost(url);
+
+				request.setHeader("Accept", "application/json");
+				request.setHeader("Content-type", "application/json");
+
+				Gson gson = new Gson();
+
+				JsonElement jsonElement = gson.toJsonTree(arrayList, new TypeToken<ArrayList<Acta>>(){}.getType());
+				JsonArray jsonArray = jsonElement.getAsJsonArray();
+
+				JsonObject jsonObject = new JsonObject();
+				jsonObject.addProperty("tipo","objeto");
+				jsonObject.add("data", jsonArray);
+
+				String json = gson.toJson(jsonObject);
+
+				Log.d(TAG, json);
+
+				StringEntity entity = new StringEntity(json,HTTP.UTF_8);
+				request.setEntity(entity);
+
+				DefaultHttpClient httpClient = new DefaultHttpClient();
+				HttpResponse response = httpClient.execute(request);
+
+				result = EntityUtils.toString(response.getEntity());
+
+				Log.d("Sincronizar",result);
+
+			}
+			catch (Exception ex)
+			{
+				Log.e(TAG, "SYNC_DATA_BD", ex);
+			}
+
+		}
+	}
+
+
 
     private class SincronizarDataDB extends AsyncTask<Void, Void, String>
     {

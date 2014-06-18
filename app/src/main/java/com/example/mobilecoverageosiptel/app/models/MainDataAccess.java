@@ -32,6 +32,7 @@ public class MainDataAccess {
             values.put("Localidad", oActa.localidad);
             values.put("Latitud", oActa.latitud);
             values.put("Longitud", oActa.longitud);
+			values.put("Altura", oActa.altura);
 
             Long id = dbHelper.getDatabase().insertOrThrow("Acta", null, values);
 
@@ -69,7 +70,7 @@ public class MainDataAccess {
             dbHelper.openDataBase();
             dbHelper.beginTransaction();
 
-            String SQL = "select Departamento, Provincia, Distrito, Localidad, Latitud, Longitud from Acta";
+            String SQL = "select Departamento, Provincia, Distrito, Localidad, Latitud, Longitud, Altura from Acta";
 
             cursor = dbHelper.getDatabase().rawQuery(SQL, null);
 
@@ -86,6 +87,7 @@ public class MainDataAccess {
                     oActa.localidad = cursor.getString(cursor.getColumnIndex("Localidad"));
                     oActa.latitud = cursor.getString(cursor.getColumnIndex("Latitud"));
                     oActa.longitud = cursor.getString(cursor.getColumnIndex("Longitud"));
+					oActa.altura = cursor.getString(cursor.getColumnIndex("Altura"));
 
                     actaArrayList.add(oActa);
                     cursor.moveToNext();
