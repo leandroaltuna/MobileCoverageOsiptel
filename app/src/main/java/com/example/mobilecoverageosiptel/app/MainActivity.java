@@ -6,6 +6,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 
@@ -39,6 +42,8 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+	Sincronizar sincronizar;
 
     ProgressDialog progressDialog;
 
@@ -59,6 +64,29 @@ public class MainActivity extends ActionBarActivity {
     private static boolean cargando = false;
 
     ArrayList<Acta> actaArrayList = new ArrayList<Acta>();
+
+	Handler handler = new Handler()
+	{
+		@Override
+		public void handleMessage(Message msg) {
+			Bundle bundle = msg.getData();
+			int row_affect = bundle.getInt("Key");
+
+			if ( row_affect > 0)
+			{
+				Toast.makeText(getApplicationContext(), "Sincronizacion satisfactoria ", Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Toast.makeText(getApplicationContext(), "Ocurrio un error al sincronizar ", Toast.LENGTH_SHORT).show();
+			}
+
+			sincronizar.interrupt();
+			sincronizar = null;
+			Log.d("Handler","Thread interrumpido");
+
+		}
+	};
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +122,8 @@ public class MainActivity extends ActionBarActivity {
 				Log.d(TAG, "startService");
 
 				actaArrayList = MainBusinessLogic.ListaActaAll(getApplicationContext());
-				Sincronizar sincronizar = new Sincronizar(actaArrayList);
+				sincronizar = new Sincronizar(actaArrayList, handler);
 				sincronizar.start();
-
 
 //
 //
@@ -153,9 +180,6 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
-
     private class RegistraDataDB extends AsyncTask<Void, Void, String>
     {
         @Override
@@ -204,14 +228,20 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+
+
+
+
 	private class Sincronizar extends Thread
 	{
 		private ArrayList<Acta> arrayList;
+		Handler hand;
 
-		public Sincronizar(ArrayList<Acta> arrayList)
+		public Sincronizar(ArrayList<Acta> arrayList, Handler hand)
 		{
 			super("SincronizarThread");
 			this.arrayList = arrayList;
+			this.hand = hand;
 		}
 
 		@Override
@@ -250,8 +280,19 @@ public class MainActivity extends ActionBarActivity {
 
 				result = EntityUtils.toString(response.getEntity());
 
+				jsonElement = new JsonParser().parse(result);
+				jsonObject = jsonElement.getAsJsonObject();
+
+				int row_affect = jsonObject.get("msg").getAsInt();
+
 				Log.d("Sincronizar",result);
 
+				Message message = new Message();
+				Bundle b = new Bundle();
+				b.putInt("Key", row_affect);
+
+				message.setData(b);
+				hand.sendMessage(message);
 			}
 			catch (Exception ex)
 			{
