@@ -97,4 +97,8 @@ public class Acta {
     @SerializedName("nextel")
     public String nextel;
 
+    @Expose()
+    @SerializedName("altura")
+    public String altura;
+
 }
